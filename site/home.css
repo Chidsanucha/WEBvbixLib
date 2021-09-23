@@ -1,9 +1,15 @@
 * {box-sizing: border-box;}
-        
+html {
+  height:100%;
+}
+
 body {
   margin: 0;
   background-color: rgb(245, 245, 245);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  overflow-y:auto;
+  overflow-x:auto;
 }
 
 .topnav {
@@ -66,11 +72,11 @@ h4 {
 
 /* Fixed sidenav, full height */
 .sidenav {
-height: 500px;
+height: 650px;
 width: 100%;
-position: fixed;
+
 z-index: 1;
-overflow-x: hidden;
+
 padding-top: 20px;
 }
 

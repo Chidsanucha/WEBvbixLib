@@ -1,0 +1,156 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link  rel="stylesheet" type="text/css" href="home.css">  <!-- ! ดึงไฟล์css -->
+ </head>
+ <body>
+  <pre>
+   <code>
+    //credentials
+    var domain = "scgico.kissflow.com";
+    var accountId = "Ac1xXSibOUGjQ";
+    var processId = "SCG_ICO_HR_Letter_Request";
+    var apiKey = "Ake499efdd-1000-4efd-aa26-569bddf717d4"; // Kissflow VBix API Key //
+    var instanceId = "Pkw5K_nuHE6aT";
+    //document and folder ids/ urls
+    const TEMPLATE_ID = "15CUGYC0kS4zdf3A5KLWj1PF2XL-T4r6q-nJ7x3vLQg8";
+    const BACKUP_FOLDER_ID = "1TKB1iV98Q8mw4tQLZJgNdbhfNoIwhIZQ";
+    const IMAGE_TYPE = [".png", ".jpg"];
+    const LOG_URL = "https://docs.google.com/document/d/1YQ4P8goZJT9QUKiitKhDaoazDowJKIbxK8cbyoARqfE/edit";
+    
+    
+    //stand alone function to test the script
+    function standAlone() {
+      try {
+        var jsonData = VBixLib.getUpdateData(domain, accountId, apiKey, processId, instanceId);
+        Logger.log(jsonData)
+        var jsonString = JSON.stringify(jsonData)
+        var blob = Utilities.newBlob(jsonString);
+        var e = {
+          postData: blob
+        };
+        doPost(e);
+    
+      } catch (err) {
+        setLog(">> "+new Date() + " : " + err.stack);
+      }
+    }
+    
+    
+    function doPost(e) {
+      try {
+        var jsonString = e.postData.getDataAsString();
+        var jsonData = JSON.parse(jsonString);
+        var refNo = jsonData["Ref_No"] || "";
+        var subject = jsonData["Subject"] || "";
+        var instanceId = jsonData["_id"] || "";
+        var managerEmail = jsonData["Manager_Email"] || "";
+        // Utilities.sleep(15000)
+        jsonData = VBixLib.getUpdateData(domain, accountId, apiKey, processId, instanceId);
+        var hrletter = jsonData["HRLetter"] || "";
+        setLog(">> "+new Date() + " : " + "Create new "  + hrletter + " of request no. " + refNo);
+        // var memoType = jsonData["Memo_Type"] || "";
+        // var templateId = TEMPLATES_IDS[memoType];
+        var template = DriveApp.getFileById(TEMPLATE_ID);
+        var fileName = hrletter + " " + refNo;
+        var newTemplate = template.makeCopy().setName(fileName);
+        var newTemplateFile = DocumentApp.openByUrl(newTemplate.getUrl());
+        var body = newTemplateFile.getBody();
+        var footer = newTemplateFile.getFooter();
+        var hasTable = false;
+    
+        //write data to sheet main
+        for (var fieldId in jsonData) {
+          var field = jsonData[fieldId] || 0;
+          var searchPattern = "{" + fieldId + "}";
+          //console.log(searchPattern);
+          if (typeof(field["key"]) !== "undefined") {
+    
+            //detect for signature
+            var signatureImage = VBixLib.getSignatureOverGrid(domain, accountId, apiKey, processId, instanceId, field["key"]);
+              var found = replaceTextToImage(body, searchPattern, signatureImage, 150);
+              found = replaceTextToImage(footer, searchPattern, signatureImage, 150);   
+    
+          } else {
+            body.replaceText(searchPattern, field);
+            footer.replaceText(searchPattern, field);
+          }
+    
+        }
+        // newTemplateFile.saveAndClose();
+        //replace field inside footer
+         footer.replaceText('{(.*?)}', '');
+         body.replaceText('{(.*?)}', '');
+         
+     
+        newTemplateFile.saveAndClose();
+        //backup all sheet
+         var backupFolder = DriveApp.getFolderById(BACKUP_FOLDER_ID);
+         var copiedFile = DriveApp.getFileById(newTemplate.getId()).makeCopy().setName(newTemplate.getName() + "-Document")
+         copiedFile.moveTo(backupFolder);
+    
+        // backup pdf 
+        // var docx = VBixLib.exportFile(newTemplate.getId(), "docx", newTemplate.getName());
+        // backupFolder.createFile(docx);
+    
+        var pdf = VBixLib.exportFile(newTemplate.getId(), "pdf", newTemplate.getName());
+        backupFolder.createFile(pdf);
+       
+         var status = jsonData["_status"] || "";
+         if(status=="InProgress"){
+        VBixLib.uploadWithDelete(domain,accountId,apiKey,processId,instanceId,"Draft_Letter",pdf,true);
+        }
+    
+        // remove new template file
+        var removeFile = DriveApp.getFileById(newTemplate.getId());
+        removeFile.setTrashed(true);
+        // removeFile = DriveApp.getFileById(tableTemplate.getId());
+        // removeFile.setTrashed(true);
+    
+        Logger.log(status)
+        if(status=="Completed"){
+    //send email
+        var subject = "Your HR Letter Guarantee Letter Was Approved";
+        var mailBody = "FYI: Your HR Letter Guarantee Letter  was approved, please check the attached file.";
+        var mail = jsonData["Requester_Email"] || "";
+        GmailApp.sendEmail(mail, subject, mailBody, {bcc: "fauzanoi@scg.com, elcidita@scg.com, argarizk@scg.com,chidsanucha.n@vbix.co.th," + managerEmail, attachments: pdf});
+         VBixLib.uploadWithDelete(domain,accountId,apiKey,processId,instanceId,"Approved_Letter",pdf,true);
+        }
+    
+    
+        setLog("New " + hrletter + " HR Letter created.");
+      } catch (err) {
+        setLog(err.stack);
+        throw err;
+      }
+    }
+    
+    // //script from https://gist.github.com/tanaikech/f84831455dea5c394e48caaee0058b26
+    function replaceTextToImage(body, searchText, image, width) {
+      var next = body.findText(searchText);
+      if (!next) return;
+      var r = next.getElement();
+      r.asText().setText("");
+      var img = r.getParent().asParagraph().insertInlineImage(0, image);
+      if (width && typeof width == "number") {
+        var w = img.getWidth();
+        var h = img.getHeight();
+        img.setWidth(width);
+        img.setHeight(width * h / w);
+      }
+      return next;
+    };
+    
+    function setLog(message) {
+      var doc = DocumentApp.openByUrl(LOG_URL)
+      var body = doc.getBody();
+      body.appendParagraph(message);
+    }
+   </code>
+   
+  </pre>
+ </body>
+ </html>
