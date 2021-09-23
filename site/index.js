@@ -1,18 +1,51 @@
  /* Loop through all dropdown buttons to toggle between hiding and showing its dropdown content - This allows the user to have multiple dropdowns without any conflict */
- var dropdown = document.getElementsByClassName("dropdown-btn");
+ var dropdown_domain = document.getElementsByClassName("dropdown-domain");
  var i;
  
- for (i = 0; i < dropdown.length; i++) {
-   dropdown[i].addEventListener("click", function() {
+ for (i = 0; i < dropdown_domain.length; i++) {
+   dropdown_domain[i].addEventListener("click", function() {
    this.classList.toggle("active");
-   var dropdownContent = this.nextElementSibling;
-   if (dropdownContent.style.display === "block") {
-   dropdownContent.style.display = "none";
+   var dropdownContent_domain = this.nextElementSibling;
+   if (dropdownContent_domain.style.display === "block") {
+   dropdownContent_domain.style.display = "none";
    } else {
-   dropdownContent.style.display = "block";
+   dropdownContent_domain.style.display = "block";
    }
    });
  }
+ var dropdown_flow = document.getElementsByClassName("dropdown-flow");
+ var i;
+ 
+ for (i = 0; i < dropdown_flow.length; i++) {
+   dropdown_flow[i].addEventListener("click", function() {
+   this.classList.toggle("active");
+   var dropdownContent_flow = this.nextElementSibling;
+   if (dropdownContent_flow.style.display === "block") {
+   dropdownContent_flow.style.display = "none";
+   } else {
+   dropdownContent_flow.style.display = "block";
+   }
+   });
+ }
+ var dropdown_script = document.getElementsByClassName("dropdown-script");
+ var i;
+ 
+ for (i = 0; i < dropdown_script.length; i++) {
+   dropdown_script[i].addEventListener("click", function() {
+   this.classList.toggle("active");
+   var dropdownContent_script = this.nextElementSibling;
+   if (dropdownContent_script.style.display === "block") {
+   dropdownContent_script.style.display = "none";
+   } else {
+   dropdownContent_script.style.display = "block";
+   }
+   });
+ }
+
+
+
+
+
  function myFunction() {
 /* Get the text field */
 var copyText = document.getElementById("myInput");

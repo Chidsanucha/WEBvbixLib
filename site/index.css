@@ -81,7 +81,7 @@ padding-top: 20px;
 }
 
 /* Style the sidenav links and the dropdown button */
-.sidenav a, .dropdown-btn {
+.sidenav a, .dropdown-domain {
 padding: 6px 8px 6px 16px;
 text-decoration: none; 
 font-size: 22px;
@@ -100,8 +100,64 @@ outline: none;
 }
 
 /* On mouse-over */
-.sidenav h4:hover, .dropdown-btn:hover {
-    background-color: #e6e6e6dc;
+.sidenav  .dropdown-domain:hover {
+    background: #e6e6e6dc;
+color: #832121;
+}
+
+.sidenav a, .dropdown-flow {
+  padding: 6px 8px 6px 16px;
+
+  text-decoration: none; 
+  font-size: 22px;
+  color: #818181;
+  display: block;
+  background-color: rgb(237, 236, 236);
+  box-shadow: 1px 1px 2px #888888;
+  border: 1px solid #cfcfcf;
+  /* border: none; */
+  /* background: none; */
+  width: 100%;
+  height: 60px;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  }
+  
+  /* On mouse-over */
+  .sidenav  .dropdown-flow:hover {
+      background: #dfd1d1dc;
+  color: #832121;
+  }
+
+  
+.sidenav a, .dropdown-script {
+  padding: 10px 8px 6px 16px;
+ 
+  text-decoration: none; 
+  font-size: 22px;
+  color: #818181;
+  display: block;
+  background-color: rgb(252, 252, 252);;
+  box-shadow: 1px 1px 2px #888888;
+  border: 1px solid #cfcfcf;
+  /* border: none; */
+  /* background: none; */
+  width: 100%;
+  height: 60px;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  }
+  
+  /* On mouse-over */
+  .sidenav  .dropdown-script:hover {
+      background: #cea4a4dc;
+  color: #832121;
+  }
+
+  .sidenav h4:hover{
+    
 color: #832121;
 }
 
@@ -111,10 +167,12 @@ margin-left: 200px; /* Same as the width of the sidenav */
 font-size: 20px; /* Increased text to enable scrolling */
 padding: 0px 10px;
 }
+
 .active {
 background-color: #d4d4d4dc;
 color: #303030;
 }
+
 
 /* Dropdown container (hidden by default). Optional: add a lighter background color and some left padding to change the design of the dropdown content */
 .dropdown-container {
